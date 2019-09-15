@@ -1,3 +1,4 @@
+# Updated 9/9/19 - VL53L1X range changed to 3 (long range)
 import smbus2 as smbus
 import board
 import busio
