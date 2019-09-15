@@ -8,9 +8,9 @@ With a new antsle need to add remote origin for github
 1. `$ mkdir root/Github`
 2. `$ cd root/Github`
 3. `$ git init`
-4. `$ git remote add origin https://github.com/corymosiman12/ARPA-E-Sensor`
+4. `$ git remote add origin https://github.com/mhsjacoby/ARPA-E-Sensor.git`
 5. `$ git fetch origin`
-6. `$ git checkout [current branch]`
+6. `$ git checkout [current branch]` (current branch should be `master`)
 
 # Antlet setup
 1. Create a new `Ubuntu16.04 - KVM` antlet through antman.  I have been using `Inherit` compression.
@@ -26,6 +26,10 @@ With a new antsle need to add remote origin for github
 - If it is the first drive created, the target name should always be `vdb` (`vdc` in HPDblack)
 - Regardless of the target name, when we need to create a new directory, name it `/mnt/vdb`, i.e. perform `mkdir /mnt/vdb`.
 - Follow the rest of the guide, only performing the Debian/Ubuntu steps.
+
+4. install Pillow package for python
+- `pip install Pillow`
+
 
 ## Rename host (need to change in two files)
 `$ sudo nano /etc/hostname`, and change name to 'BS1-Antlet' or similar then reboot.
@@ -50,16 +54,16 @@ This is a combination of the update posted in [this install guide](https://mediu
 - `pip3 install virtualenv virtualenvwrapper`
 
 2. virtualenv and virtualenvwrapper setup
-- `$ nano .bashrc` and add the following 3 lines to bottom
+- `nano .bashrc` and add the following 3 lines to bottom
 - `export VIRTUALENVWRAPPER_PYTHON=/usr/bin/python3`
 - `export WORKON_HOME=$HOME/.virtualenvs`
 - `source /usr/local/bin/virtualenvwrapper.sh`
 
 Exit out of the `.bashrc` file and run at the command line:
-- `$ source .bashrc`
+- `source .bashrc`
 
 3. Create a new virtualenv called 'cv':
-- `$ mkvirtualenv cv`
+- `mkvirtualenv cv`
 
 When you are in the virtualenv, (cv) should appear at the front now.  You can run `(cv) $ deactivate` to exit out of a virtualenv.  Then run `$ workon cv` to enter back into the virtualenv.  See here for docs: https://virtualenvwrapper.readthedocs.io/en/latest/command_ref.html
 
