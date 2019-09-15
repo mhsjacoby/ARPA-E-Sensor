@@ -1,4 +1,4 @@
-# Updated 9/14/2019
+# Updated 9/15/2019 - specify pickle write location (write_loc) at run
 
 import os
 import sys
@@ -26,36 +26,30 @@ NewImage = collections.namedtuple('NewImage', 'day time data')
 
 
 class ImageFile():
-    def __init__(self, on_line, sensor, files_dir, house):
+    def __init__(self, on_line, sensor, files_dir, house, write_loc):
         self.on_line = on_line
         self.sensor = sensor
         self.path = files_dir   
         self.dark_days = {}
         self.dark_days_summary = {}
         self.home = house
+        self.write_location = write_loc
         self.get_params()  
 
 
     def get_params(self):
         today = datetime.now().strftime('_%Y-%m-%d')
-        if not self.on_line:
-            self.write_location = '/Users/maggie/Desktop/HPD_mobile_data/HPD_mobile-H1/' + self.home + '_ImagesPickled_' + self.sensor + today
-        else:
-            self.write_location = os.path.join(self.path, self.home + '_ImagesPickled_' + self.sensor + today)
-            #stored = self.path.slpit('/')
-            #self.write_location = os.path.join(stored[1], stored[2], self.sensor, 'pickled_images')
-        print(self.write_location)
+        # if not self.on_line:
+        #     self.write_location = '/Users/maggie/Desktop/HPD_mobile_data/HPD_mobile-H1/' + self.home + '_ImagesPickled_' + self.sensor + today
+        # else:
+        #     self.write_location = os.path.join(self.path, self.home + '_ImagesPickled_' + self.sensor + today)
+        # print(self.write_location)
         try:
             if not os.path.isdir(self.write_location):
                 print('Making directory: {}'.format(self.write_location))
                 os.makedirs(self.write_location)
         except Exception as e:
             print('Error making directory {}: {}'.format(self.write_location, e))
-       
-    # def import_conf(self):
-    #     with open('/root/client/client_conf.json', 'r') as f:
-    #         conf = json.loads(f.read())
-    #     return conf
 
     def mylistdir(self, directory):
         filelist = os.listdir(directory)
@@ -163,5 +157,6 @@ if __name__ == '__main__':
     sensor = sys.argv[1] if len(sys.argv) > 1 else 'BS1'
     stored_loc = sys.argv[2] if len(sys.argv) > 1 else '/Users/maggie/Desktop/HPD_mobile_data/HPD_mobile-H1/BS1/img'
     house = sys.argv[3] if len(sys.argv) > 1 else 'H1'
-    I = ImageFile(on_line, sensor, stored_loc, house)
+    write_loc = sys.argv[4] if len(sys.argv) > 1 else '/Users/maggie/Desktop/HPD_mobile_data/HPD_mobile-H1/'
+    I = ImageFile(on_line, sensor, stored_loc, house, write_loc)
     I.main()
