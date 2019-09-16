@@ -1,3 +1,6 @@
+## This code counts the number of actual audio files on the antlet
+# run by specifying server id (BS1, etc) and number of days to look backwards
+
 import os
 import sys
 import csv
