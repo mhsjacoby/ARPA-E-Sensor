@@ -1,4 +1,4 @@
-# Updated 9/15/2019 - specify pickle write location (write_loc) at run
+# Updated 9/15/2019 - 
 
 import os
 import sys
@@ -78,6 +78,7 @@ class ImageFile():
 
     def pickle_object(self, entry, fname, day_loc):
         print('time is: {}'.format(datetime.now().strftime('%H:%M:%S')))
+        # fname = day + '_' + self.sensor + '.pklz'
         if not os.path.isdir(day_loc):
             os.makedirs(day_loc)
             print('Making day: {}'.format(day_loc))
