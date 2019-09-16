@@ -33,7 +33,7 @@ class ImageFile():
         self.dark_days = {}
         self.dark_days_summary = {}
         self.home = house
-        self.write_location = write_loc
+        self.write_path = write_loc
         self.get_params()  
 
 
@@ -42,8 +42,8 @@ class ImageFile():
         # if not self.on_line:
         #     self.write_location = '/Users/maggie/Desktop/HPD_mobile_data/HPD_mobile-H1/' + self.home + '_ImagesPickled_' + self.sensor + today
         # else:
-        #     self.write_location = os.path.join(self.path, self.home + '_ImagesPickled_' + self.sensor + today)
-        # print(self.write_location)
+        self.write_location = os.path.join(self.write_path, self.home + '_ImagesPickled_' + self.sensor + today)
+        print(self.write_location)
         try:
             if not os.path.isdir(self.write_location):
                 print('Making directory: {}'.format(self.write_location))

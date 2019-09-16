@@ -1,0 +1,118 @@
+# Updated 9/12/2019
+
+import os
+import sys
+import numpy as np
+import pandas as pd
+from datetime import datetime
+from PIL import Image
+import pickle
+import gzip
+import json
+import collections
+import scipy.io.wavfile
+
+
+NewAudio = collections.namedtuple('NewAudio', 'day time data')
+
+
+class AudioFile():
+    def __init__(self, on_line, sensor, files_dir, house):
+        self.on_line = on_line
+        self.sensor = sensor
+        self.path = files_dir   
+        self.home = house
+        self.get_params()  
+
+
+    def get_params(self):
+        today = datetime.now().strftime('_%Y-%m-%d')
+        if not self.on_line:
+            self.write_location = '/Users/maggie/Desktop/' + self.home + '_AudioPickled_' + self.sensor + today
+        else:
+            self.write_location = os.path.join(self.path, self.home + '_AudioPickled_' + self.sensor + today)
+        print(self.write_location)
+        try:
+            if not os.path.isdir(self.write_location):
+                print('Making directory: {}'.format(self.write_location))
+                os.makedirs(self.write_location)
+        except Exception as e:
+            print('Error making directory {}: {}'.format(self.write_location, e))
+
+    def mylistdir(self, directory):
+        filelist = os.listdir(directory)
+        return [x for x in filelist if not (x.startswith('.') or 'Icon' in x)]
+
+    def get_time(self, file_name):
+        day_time = datetime.strptime(file_name.strip('_audio.wav'), '%Y-%m-%d %H%M%S')
+        return day_time.strftime('%Y-%m-%d %H%M%S')
+
+    def read_audio(self, wav_path):
+        _, wav = scipy.io.wavfile.read(wav_path)
+        return wav
+
+    def pickle_object(self, entry, fname, day_loc):
+        print('time is: {}'.format(datetime.now().strftime('%H:%M:%S')))
+        if not os.path.isdir(day_loc):
+            os.makedirs(day_loc)
+            print('Making day: {}'.format(day_loc))
+        f = gzip.open(os.path.join(day_loc, fname), 'wb')
+        pickle.dump(entry, f)
+        f.close() 
+        print('File written: {}'.format(fname))
+
+    # def write_json(self, output_dict, day):
+    #     json_files_stored = os.path.join(self.write_location, 'missing_audio_dicts')
+    #     if not os.path.isdir(json_files_stored):
+    #         os.makedirs(json_files_stored)
+    #     fname = day + '_missing_audio.json'
+    #     write_file = os.path.join(json_files_stored, fname)
+    #     if not os.path.exists(write_file):
+    #         print('Writing missing audio for day {} to file {}'.format(day, write_file))
+    #         with open(write_file, 'w+') as f:
+    #             f.write(json.dumps(output_dict))
+    #     else:
+    #         print('{} already exists.'.format(write_file))       
+
+
+    def main(self):
+        for day in sorted(self.mylistdir(self.path)):
+            print(day)
+            hours = [str(x).zfill(2) + '00' for x in range(0,24)]
+            all_mins = sorted(self.mylistdir(os.path.join(self.path, day)))
+            for hr in hours:
+                hr_entry = []
+                this_hr = [x for x in all_mins if x[0:2] == hr[0:2]]
+                if len(this_hr) > 0:
+                    for minute in sorted(this_hr):
+                        for wav_file in sorted(self.mylistdir(os.path.join(self.path, day, minute))):
+                            day_time = self.get_time(wav_file).split(' ')
+                            str_day, str_time = day_time[0], day_time[1]
+                            try:
+                                audio_list = self.read_audio(os.path.join(self.path, day, minute, wav_file))
+                                print(type(audio_list))
+                                str_time = NewAudio(day=str_day, time=str_time, data=audio_list)
+                                hr_entry.append(str_time)
+                                
+                            except Exception as e:
+                                print('Audio error: {}'.format(e))
+                    
+                    fname = day + '_' + hr + '_' + self.sensor + '_' + self.home + 'audio.pklz'
+                    write_day = os.path.join(self.write_location, str_day)
+
+                    try:
+                        self.pickle_object(hr_entry, fname, write_day)
+                    except Exception as e:
+                        print('Pickle error: {}'.format(e))
+
+                else:
+                    print('No files for {}, hour {}'.format(day, hr))
+
+                            
+if __name__ == '__main__':
+    on_line = True if len(sys.argv) > 1 else False
+    sensor = sys.argv[1] if len(sys.argv) > 1 else 'BS1'
+    stored_loc = sys.argv[2] if len(sys.argv) > 1 else '/Users/maggie/Desktop/audio_pickling/H1/BS1/'
+    house = sys.argv[3] if len(sys.argv) > 1 else 'H1'
+    I = AudioFile(on_line, sensor, stored_loc, house)
+    I.main()
