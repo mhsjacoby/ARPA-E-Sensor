@@ -17,11 +17,12 @@ NewAudio = collections.namedtuple('NewAudio', 'day time data')
 
 
 class AudioFile():
-    def __init__(self, on_line, sensor, files_dir, house):
+    def __init__(self, on_line, sensor, files_dir, house, write_loc):
         self.on_line = on_line
         self.sensor = sensor
         self.path = files_dir   
         self.home = house
+        self.write_path = write_loc
         self.get_params()  
 
 
@@ -30,7 +31,7 @@ class AudioFile():
         # if not self.on_line:
         #     self.write_location = '/Users/maggie/Desktop/' + self.home + '_AudioPickled_' + self.sensor + today
         # else:
-        self.write_location = os.path.join(self.path, self.home + '_AudioPickled_' + self.sensor + today)
+        self.write_location = os.path.join(self.write_path, self.home + '_AudioPickled_' + self.sensor + today)
         print(self.write_location)
         try:
             if not os.path.isdir(self.write_location):
@@ -81,8 +82,8 @@ class AudioFile():
                                 
                             except Exception as e:
                                 print('Audio error: {}'.format(e))
-                    if len(hour_entr) > 0:
-                        fname = day + '_' + hr + '_' + self.sensor + '_' + self.home + 'audio.pklz'
+                    if len(hr_entry) > 0:
+                        fname = day + '_' + hr + '_' + self.sensor + '_' + self.home + '_audio.pklz'
                         write_day = os.path.join(self.write_location, str_day)
 
                         try:
