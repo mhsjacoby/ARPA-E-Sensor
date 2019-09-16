@@ -64,15 +64,13 @@ class ImageExtract():
                 hour_fdata = self.unpickle(os.path.join(self.root_dir, day, f))
 
                 for entry in [x for x in hour_fdata if len(hour_fdata) > 0]:
+                    print(len(entry.data))
                     if entry.data != 0:
                         new_image = self.extract_images(entry.data)
                         full_img_dir = os.path.join(new_store_dir, str(entry.time)[0:4])
                         if not os.path.isdir(full_img_dir):
                             os.makedirs(full_img_dir)
-                        """ 
-                        Comment out the next 2 lines if you want to keep
-                        the images as an array or list (need to save new_image in this case)
-                        """
+
                         fname = str(entry.day + '_' + entry.time + '_' + sensor + '_' + home + '.png')
                         if not os.path.exists(os.path.join(full_img_dir, fname)):
                             new_image.save(os.path.join(full_img_dir, fname))
