@@ -25,24 +25,21 @@ NewImage = collections.namedtuple('NewImage', 'day time data')
 
 
 
-class ImageFile():
+class DataFile():
     def __init__(self, on_line, sensor, files_dir, house, write_loc):
         self.on_line = on_line
         self.sensor = sensor
         self.path = files_dir   
-        self.dark_days = {}
-        self.dark_days_summary = {}
+        # self.dark_days = {}
+        # self.dark_days_summary = {}
         self.home = house
         self.write_path = write_loc
         self.get_params()  
 
 
-    def get_params(self):
+    def get_params(self, filetype):
         today = datetime.now().strftime('_%Y-%m-%d')
-        # if not self.on_line:
-        #     self.write_location = '/Users/maggie/Desktop/HPD_mobile_data/HPD_mobile-H1/' + self.home + '_ImagesPickled_' + self.sensor + today
-        # else:
-        self.write_location = os.path.join(self.write_path, self.home + '_ImagesPickled_' + self.sensor + today)
+        self.write_location = os.path.join(self.write_path, self.home + file_type + self.sensor + today)
         print(self.write_location)
         try:
             if not os.path.isdir(self.write_location):
@@ -59,26 +56,20 @@ class ImageFile():
         day_time = datetime.strptime(file_name.strip('_photo.png'), '%Y-%m-%d %H%M%S')
         return day_time.strftime('%Y-%m-%d %H%M%S')
 
-    def load_image(self, png):
-        im = Image.open(png)
-        im_array = np.array(list(im.getdata()))
-        small_img = im.resize((112,112), Image.BILINEAR)
-        ave_pxl = np.mean(im_array)
-        return small_img if ave_pxl > 10 else 0
+    # def load_image(self, png):
+    #     im = Image.open(png)
+    #     im_array = np.array(list(im.getdata()))
+    #     small_img = im.resize((112,112), Image.BILINEAR)
+    #     ave_pxl = np.mean(im_array)
+    #     return small_img if ave_pxl > 10 else 0
 
     """
     The following method creates a pandas dataframe for all images that 
     are supposed to be present. It is not active now
     """
-    # def make_date_range(self, day):
-    #     self.range_start = str(day + ' 00:00:00')
-    #     self.range_end = str(day + ' 23:59:59')
-    #     date_range = pd.date_range(start=self.range_start, end=self.range_end, freq='1s')
-    #     return date_range   
 
     def pickle_object(self, entry, fname, day_loc):
         print('time is: {}'.format(datetime.now().strftime('%H:%M:%S')))
-        # fname = day + '_' + self.sensor + '.pklz'
         if not os.path.isdir(day_loc):
             os.makedirs(day_loc)
             print('Making day: {}'.format(day_loc))

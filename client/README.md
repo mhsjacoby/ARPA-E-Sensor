@@ -27,8 +27,9 @@ With a new antsle need to add remote origin for github
 - Regardless of the target name, when we need to create a new directory, name it `/mnt/vdb`, i.e. perform `mkdir /mnt/vdb`.
 - Follow the rest of the guide, only performing the Debian/Ubuntu steps.
 
-4. install Pillow package for python
+4. install pickle, pillow, and scipy packages for python (for )
 - `pip install Pillow`
+- `pip install scipy`
 
 
 ## Rename host (need to change in two files)
