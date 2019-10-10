@@ -15,7 +15,7 @@
     },
     "collect_interval_min": "2",
     "env_params_read_interval_sec": "10",
-    "img_audio_root": "/mnt/disk3/",
+    "img_audio_root": "/mnt/disk2/",
     "store_location": "/root/",
     
     "stream_type": "mjpeg",
