@@ -62,40 +62,43 @@ class AudioFile():
     def main(self):
         print('Start date: {}'.format(self.start_date))
         for day in sorted(self.mylistdir(self.path)):
-            if datetime.strptime(day, '%Y-%m-%d') >= datetime.strptime(self.start_date, '%Y-%m-%d'):
-                print(day)
-                hours = [str(x).zfill(2) + '00' for x in range(0,24)]
-                all_mins = sorted(self.mylistdir(os.path.join(self.path, day)))
-                for hr in hours:
-                    hr_entry = []
-                    this_hr = [x for x in all_mins if x[0:2] == hr[0:2]]
-                    if len(this_hr) > 0:
-                        for minute in sorted(this_hr):
-                            for wav_file in sorted(self.mylistdir(os.path.join(self.path, day, minute))):
-                                day_time = self.get_time(wav_file).split(' ')
-                                str_day, str_time = day_time[0], day_time[1]
+            try:
+                if datetime.strptime(day, '%Y-%m-%d') >= datetime.strptime(self.start_date, '%Y-%m-%d'):
+                    print(day)
+                    hours = [str(x).zfill(2) + '00' for x in range(0,24)]
+                    all_mins = sorted(self.mylistdir(os.path.join(self.path, day)))
+                    for hr in hours:
+                        hr_entry = []
+                        this_hr = [x for x in all_mins if x[0:2] == hr[0:2]]
+                        if len(this_hr) > 0:
+                            for minute in sorted(this_hr):
+                                for wav_file in sorted(self.mylistdir(os.path.join(self.path, day, minute))):
+                                    day_time = self.get_time(wav_file).split(' ')
+                                    str_day, str_time = day_time[0], day_time[1]
+                                    try:
+                                        audio_list = self.read_audio(os.path.join(self.path, day, minute, wav_file))
+                                        str_time = NewAudio(day=str_day, time=str_time, data=audio_list)
+                                        hr_entry.append(str_time)
+                                        
+                                    except Exception as e:
+                                        print('Audio error: {}'.format(e))
+                            if len(hr_entry) > 0:
+                                fname = day + '_' + hr + '_' + self.sensor + '_' + self.home + '_audio.pklz'
+                                write_day = os.path.join(self.write_location, str_day)
+
                                 try:
-                                    audio_list = self.read_audio(os.path.join(self.path, day, minute, wav_file))
-                                    str_time = NewAudio(day=str_day, time=str_time, data=audio_list)
-                                    hr_entry.append(str_time)
-                                    
+                                    self.pickle_object(hr_entry, fname, write_day)
                                 except Exception as e:
-                                    print('Audio error: {}'.format(e))
-                        if len(hr_entry) > 0:
-                            fname = day + '_' + hr + '_' + self.sensor + '_' + self.home + '_audio.pklz'
-                            write_day = os.path.join(self.write_location, str_day)
+                                    print('Pickle error: {}'.format(e))
+                            else:
+                                print('No audio files for {} hour: {}'.format(day, hr))
 
-                            try:
-                                self.pickle_object(hr_entry, fname, write_day)
-                            except Exception as e:
-                                print('Pickle error: {}'.format(e))
                         else:
-                            print('No audio files for {} hour: {}'.format(day, hr))
-
-                    else:
-                        print('No directories for {} hour {}'.format(day, hr))
-            else:
-                print('Day {} is before start date of {}'.format(day, self.start_date))
+                            print('No directories for {} hour {}'.format(day, hr))
+                else:
+                    print('Day {} is before start date of {}'.format(day, self.start_date))
+            except Exception as e:
+                print('Compare error: {}'.format(e))
 
                             
 if __name__ == '__main__':
