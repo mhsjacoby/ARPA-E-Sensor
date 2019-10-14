@@ -26,22 +26,19 @@ NewImage = collections.namedtuple('NewImage', 'day time data')
 
 
 class ImageFile():
-    def __init__(self, on_line, sensor, files_dir, house, write_loc):
-        self.on_line = on_line
+    def __init__(self, sensor, files_dir, house, write_loc, start_date):
         self.sensor = sensor
         self.path = files_dir   
         self.dark_days = {}
         self.dark_days_summary = {}
         self.home = house
         self.write_path = write_loc
+        self.start_date = start_date
         self.get_params()  
 
 
     def get_params(self):
         today = datetime.now().strftime('_%Y-%m-%d')
-        # if not self.on_line:
-        #     self.write_location = '/Users/maggie/Desktop/HPD_mobile_data/HPD_mobile-H1/' + self.home + '_ImagesPickled_' + self.sensor + today
-        # else:
         self.write_location = os.path.join(self.write_path, self.home + '_ImagesPickled_' + self.sensor + today)
         print(self.write_location)
         try:
@@ -101,61 +98,66 @@ class ImageFile():
 
 
     def main(self):
+        print('Start date: {}'.format(self.start_date))
         for day in sorted(self.mylistdir(self.path)):
-            print(day)
-            dark_hrs = []
-            black_images = {}
-            hours = [str(x).zfill(2) + '00' for x in range(0,24)]
-            all_mins = sorted(self.mylistdir(os.path.join(self.path, day)))
+            if datetime.strptime(day, '%Y-%m-%d') >= datetime.strptime(self.start_date, '%Y-%m-%d'):
+                print(day)
+                dark_hrs = []
+                black_images = {}
+                hours = [str(x).zfill(2) + '00' for x in range(0,24)]
+                all_mins = sorted(self.mylistdir(os.path.join(self.path, day)))
 
-            for hr in hours:
-                hr_entry = []
-                dark_mins = []
-                this_hr = [x for x in all_mins if x[0:2] == hr[0:2]]
-                if len(this_hr) > 0:
-                    for minute in sorted(this_hr):
-                        for img_file in sorted(self.mylistdir(os.path.join(self.path, day, minute))):
-                            day_time = self.get_time(img_file).split(' ')
-                            str_day, str_time = day_time[0], day_time[1]
+                for hr in hours:
+                    hr_entry = []
+                    dark_mins = []
+                    this_hr = [x for x in all_mins if x[0:2] == hr[0:2]]
+                    if len(this_hr) > 0:
+                        for minute in sorted(this_hr):
+                            for img_file in sorted(self.mylistdir(os.path.join(self.path, day, minute))):
+                                day_time = self.get_time(img_file).split(' ')
+                                str_day, str_time = day_time[0], day_time[1]
+                                try:
+                                    img_list = self.load_image(os.path.join(self.path, day, minute, img_file))
+                                    if img_list == 0:
+                                        dark_mins.append(str_time)
+                                    else:
+                                        str_time = NewImage(day=str_day, time=str_time, data=img_list)
+                                        hr_entry.append(str_time)
+
+                                except Exception as e:
+                                    print('Pillow error: {}'.format(e))
+                        if len(dark_mins) > 0:
+                            dark_hrs.append((hr, len(dark_mins)))
+                            black_images[hr] = dark_mins
+
+                        if len(hr_entry) > 0:    
+                            fname = day + '_' + hr + '_' + self.sensor + '_' + self.home + '.pklz'
+                            write_day = os.path.join(self.write_location,str_day)
+
                             try:
-                                img_list = self.load_image(os.path.join(self.path, day, minute, img_file))
-                                if img_list == 0:
-                                    dark_mins.append(str_time)
-                                else:
-                                    str_time = NewImage(day=str_day, time=str_time, data=img_list)
-                                    hr_entry.append(str_time)
-
+                                self.pickle_object(hr_entry, fname, write_day)
                             except Exception as e:
-                                print('Pillow error: {}'.format(e))
-                    if len(dark_mins) > 0:
-                        dark_hrs.append((hr, len(dark_mins)))
-                        black_images[hr] = dark_mins
-
-                    if len(hr_entry) > 0:    
-                        fname = day + '_' + hr + '_' + self.sensor + '_' + self.home + '.pklz'
-                        write_day = os.path.join(self.write_location,str_day)
-
-                        try:
-                            self.pickle_object(hr_entry, fname, write_day)
-                        except Exception as e:
-                            print('Pickle error: {}'.format(e))
+                                print('Pickle error: {}'.format(e))
+                        else:
+                            print('No images for {} hour: {}'.format(day, hr))
                     else:
-                        print('No images for {} hour: {}'.format(day, hr))
-                else:
-                    print('No directories for {} hour: {}'.format(day, hr))
+                        print('No directories for {} hour: {}'.format(day, hr))
 
-            self.dark_days_summary[day] = dark_hrs
-            self.write_json(black_images, day)
-            print(self.dark_days_summary)
+                self.dark_days_summary[day] = dark_hrs
+                self.write_json(black_images, day)
+            else:
+                print('Day {} is before start date of {}'.format(day, self.start_date))
+
         
             
 
 
 if __name__ == '__main__':
-    on_line = True if len(sys.argv) > 1 else False
-    sensor = sys.argv[1] if len(sys.argv) > 1 else 'BS1'
-    stored_loc = sys.argv[2] if len(sys.argv) > 1 else '/Users/maggie/Desktop/HPD_mobile_data/HPD_mobile-H1/BS1/img'
-    house = sys.argv[3] if len(sys.argv) > 1 else 'H1'
-    write_loc = sys.argv[4] if len(sys.argv) > 1 else '/Users/maggie/Desktop/HPD_mobile_data/HPD_mobile-H1/'
-    I = ImageFile(on_line, sensor, stored_loc, house, write_loc)
+    sensor = sys.argv[1]
+    stored_loc = sys.argv[2]
+    house = sys.argv[3] 
+    write_loc = sys.argv[4]
+    start_date = sys.argv[5] if len(sys.argv) > 5 else '2019-01-01'
+    
+    I = ImageFile(sensor, stored_loc, house, write_loc, start_date)
     I.main()
