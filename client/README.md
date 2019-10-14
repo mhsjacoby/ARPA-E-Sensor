@@ -22,12 +22,12 @@ With a new antsle need to add remote origin for github
 - Perform all OpenCV setup by ssh'ing in as the root user.
 
 3. Mount a new virtual drive with 400 GB HDD space.  Name it `vdb`, then follow this guide [here](https://docs.antsle.com/drives/).
-- IMPORTANT: use the hdd zpool, NOT the antlets zpool
-- If it is the first drive created, the target name should always be `vdb` (`vdc` in HPDblack)
+- IMPORTANT: use the hdd zpool, NOT the antlets zpool!!!
+- If it is the first drive created, the target name should always be `vdb`
 - Regardless of the target name, when we need to create a new directory, name it `/mnt/vdb`, i.e. perform `mkdir /mnt/vdb`.
 - Follow the rest of the guide, only performing the Debian/Ubuntu steps.
 
-4. install pillow and scipy packages for python (for )
+4. install pillow and scipy packages for python (for pickling audio and images)
 - `pip install Pillow`
 - `pip install scipy`
 

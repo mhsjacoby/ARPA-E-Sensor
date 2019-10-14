@@ -17,20 +17,17 @@ NewAudio = collections.namedtuple('NewAudio', 'day time data')
 
 
 class AudioFile():
-    def __init__(self, on_line, sensor, files_dir, house, write_loc):
-        self.on_line = on_line
+    def __init__(self, sensor, files_dir, house, write_loc, start_date):
         self.sensor = sensor
         self.path = files_dir   
         self.home = house
         self.write_path = write_loc
+        self.start_date = start_date
         self.get_params()  
 
 
     def get_params(self):
         today = datetime.now().strftime('_%Y-%m-%d')
-        # if not self.on_line:
-        #     self.write_location = '/Users/maggie/Desktop/' + self.home + '_AudioPickled_' + self.sensor + today
-        # else:
         self.write_location = os.path.join(self.write_path, self.home + '_AudioPickled_' + self.sensor + today)
         print(self.write_location)
         try:
@@ -63,46 +60,50 @@ class AudioFile():
         print('File written: {}'.format(fname))
    
     def main(self):
+        print('Start date: {}'.format(self.start_date))
         for day in sorted(self.mylistdir(self.path)):
-            print(day)
-            hours = [str(x).zfill(2) + '00' for x in range(0,24)]
-            all_mins = sorted(self.mylistdir(os.path.join(self.path, day)))
-            for hr in hours:
-                hr_entry = []
-                this_hr = [x for x in all_mins if x[0:2] == hr[0:2]]
-                if len(this_hr) > 0:
-                    for minute in sorted(this_hr):
-                        for wav_file in sorted(self.mylistdir(os.path.join(self.path, day, minute))):
-                            day_time = self.get_time(wav_file).split(' ')
-                            str_day, str_time = day_time[0], day_time[1]
+            if datetime.strptime(day, '%Y-%m-%d') >= datetime.strptime(self.start_date, '%Y-%m-%d'):
+                print(day)
+                hours = [str(x).zfill(2) + '00' for x in range(0,24)]
+                all_mins = sorted(self.mylistdir(os.path.join(self.path, day)))
+                for hr in hours:
+                    hr_entry = []
+                    this_hr = [x for x in all_mins if x[0:2] == hr[0:2]]
+                    if len(this_hr) > 0:
+                        for minute in sorted(this_hr):
+                            for wav_file in sorted(self.mylistdir(os.path.join(self.path, day, minute))):
+                                day_time = self.get_time(wav_file).split(' ')
+                                str_day, str_time = day_time[0], day_time[1]
+                                try:
+                                    audio_list = self.read_audio(os.path.join(self.path, day, minute, wav_file))
+                                    str_time = NewAudio(day=str_day, time=str_time, data=audio_list)
+                                    hr_entry.append(str_time)
+                                    
+                                except Exception as e:
+                                    print('Audio error: {}'.format(e))
+                        if len(hr_entry) > 0:
+                            fname = day + '_' + hr + '_' + self.sensor + '_' + self.home + '_audio.pklz'
+                            write_day = os.path.join(self.write_location, str_day)
+
                             try:
-                                audio_list = self.read_audio(os.path.join(self.path, day, minute, wav_file))
-                                str_time = NewAudio(day=str_day, time=str_time, data=audio_list)
-                                hr_entry.append(str_time)
-                                
+                                self.pickle_object(hr_entry, fname, write_day)
                             except Exception as e:
-                                print('Audio error: {}'.format(e))
-                    if len(hr_entry) > 0:
-                        fname = day + '_' + hr + '_' + self.sensor + '_' + self.home + '_audio.pklz'
-                        write_day = os.path.join(self.write_location, str_day)
+                                print('Pickle error: {}'.format(e))
+                        else:
+                            print('No audio files for {} hour: {}'.format(day, hr))
 
-                        try:
-                            self.pickle_object(hr_entry, fname, write_day)
-                        except Exception as e:
-                            print('Pickle error: {}'.format(e))
                     else:
-                        print('No audio files for {} hour: {}'.format(day, hr))
-
-                else:
-                    print('No directories for {} hour {}'.format(day, hr))
+                        print('No directories for {} hour {}'.format(day, hr))
+            else:
+                print('Day {} is before start date of {}'.format(day, self.start_date))
 
                             
 if __name__ == '__main__':
-    on_line = True if len(sys.argv) > 1 else False
-    sensor = sys.argv[1] if len(sys.argv) > 1 else 'BS1'
-    stored_loc = sys.argv[2] if len(sys.argv) > 1 else '/Users/maggie/Desktop/audio_pickling/H1/BS1/'
-    house = sys.argv[3] if len(sys.argv) > 1 else 'H1'
-    write_loc = sys.argv[4] if len(sys.argv) > 1 else '/Users/maggie/Desktop/HPD_mobile_data/HPD_mobile-H1/'
+    sensor = sys.argv[1]
+    stored_loc = sys.argv[2]
+    house = sys.argv[3]
+    write_loc = sys.argv[4]
+    start_date = sys.argv[5] if len(sys.argv) > 5 else '2019-01-01'
 
-    I = AudioFile(on_line, sensor, stored_loc, house, write_loc)
+    I = AudioFile(sensor, stored_loc, house, write_loc, start_date)
     I.main()
