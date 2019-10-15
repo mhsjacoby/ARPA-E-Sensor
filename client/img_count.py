@@ -15,12 +15,11 @@ class ImageChecker():
         self.home = home
         self.server_id = server_id
         self.days_to_check = days_to_check
-        #self.test = test
         self.display_output = display_output 
         self.write_file = write_file  
         self.data_loc = data_loc      
         self.conf()
-        self.root_dir = os.path.join(self.root, self.server_id, f'{self.home}-{self.server_id}-img-pkl')
+        self.root_dir = os.path.join(self.root, self.server_id, 'img')
 
         # self.import_conf(self.conf())
         # self.root = self.conf_dict['img_audio_root']
