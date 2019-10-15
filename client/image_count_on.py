@@ -11,19 +11,22 @@ from collections import defaultdict
 
 
 class ImageChecker():
-    def __init__(self, server_id, days_to_check, test, display_output = True, write_file = True):
+    def __init__(self, home, server_id, days_to_check, data_loc = False, display_output = True, write_file = True):
+        self.home = home
         self.server_id = server_id
         self.days_to_check = days_to_check
-        self.test = test
+        #self.test = test
         self.display_output = display_output 
-        self.write_file = write_file        
-
-        self.import_conf(self.conf())
-        self.root = self.conf_dict['img_audio_root']
+        self.write_file = write_file  
+        self.data_loc = data_loc      
+        self.conf()
         self.root_dir = os.path.join(self.root, self.server_id, 'img')
-        self.store = self.conf_dict['store_location']
 
-        self.correct_files_per_dir = self.conf_dict['imgs_per_min']
+        # self.import_conf(self.conf())
+        # self.root = self.conf_dict['img_audio_root']
+        # self.store = self.conf_dict['store_location']
+
+        self.correct_files_per_dir = 60
         self.correct_dirs_per_day = 1440
         self.correct_images_per_day = self.correct_files_per_dir * self.correct_dirs_per_day
 
@@ -40,10 +43,14 @@ class ImageChecker():
         self.images_per_day = {}
 
     def conf(self):
-        if self.test:
-            return '/Users/maggie/Desktop/HPD_test_data/test-H1/client_conf_test.json'
+        print('data_loc (inside) {}'.format(self.data_loc))
+        if not self.data_loc:
+            self.import_conf('/root/client/client_conf.json')
+            self.root = self.conf_dict['img_audio_root']
+            self.store = self.conf_dict['store_location']
         else:
-            return '/root/client/client_conf.json'
+            self.root = self.data_loc
+            self.store = os.path.join(self.root, 'Summaries', 'FileCounts')
 
 
     def import_conf(self, path):
@@ -117,7 +124,8 @@ class ImageChecker():
                 'Average number of images per non-zero_folder': avg_imgs,
                 'Number of directories w/ correct number images': len(self.count_correct),
                 'Number of directories w/ zero images': len(self.zero_hours),
-                'Hours with no images': self.zero_hours
+                'Hours with no images': self.zero_hours,
+                'Summary': (self.home, self.server_id, d, self.perc_cap)
             }
             
             output_dict_display = {
@@ -129,7 +137,8 @@ class ImageChecker():
                 'Number of directories w/ correct number images': len(self.count_correct),
                 'Number of directories w/ zero images': len(self.zero_hours),
                 'Average number of images per non-zero_folder': avg_imgs,
-                'Hours with no images': self.zero_hours
+                'Hours with no images': self.zero_hours,
+                'Summary': (self.home, self.server_id, d, self.perc_cap)
             }            
                         
             return output_dict_write, output_dict_display
@@ -138,8 +147,8 @@ class ImageChecker():
     def main(self):
         days_n = int(self.days_to_check)
         if days_n > len(self.date_folders):
-            print("Not enough days exist. Please try a smaller number.")
-            return(False)
+            print('Not enough days exist. Using {} days'.format(len(self.date_folders)))
+            days_n = len(self.date_folders)
         for d in self.date_folders[-days_n:]:
             self.hr_min_dirs = self.mylistdir(os.path.join(self.root_dir, d))
             self.zero_hours = []
@@ -158,13 +167,12 @@ class ImageChecker():
 
 
 if __name__ == '__main__':
-    server_id = sys.argv[1]
-    days = sys.argv[2]
+    home = sys.argv[1]
+    server_id = sys.argv[2]
+    days = sys.argv[3]
+    data_loc = sys.argv[4] if len(sys.argv) > 4 else False
+    print('data_loc (outside) {}'.format(data_loc))
+    print('len of sys.argv {}'.format(len(sys.argv)))
 
-    if len(sys.argv) > 3:
-        test = sys.argv[3]
-    else:
-        test = False
-
-    a = ImageChecker(server_id, days, test)
+    a = ImageChecker(home, server_id, days, data_loc)
     a.main()
