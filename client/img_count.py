@@ -123,6 +123,8 @@ class ImageChecker():
             non_zero_dirs = [i for i in self.hr_min_dirs if i not in self.zero_hours]
             avg_imgs = self.total_imgs / len(non_zero_dirs)
 
+            print(d)
+            print(self.first_last)
             F1, F2 = self.first_last[d][0], self.first_last[d][1]
             s = (f'({F1[0:2]}:{F1[2:4]}, {F2[0:2]}:{F2[2:4]})')
             Summary = '{} {} {} {}'.format(self.server_id, d, s, self.perc_cap)

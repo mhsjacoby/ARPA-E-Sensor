@@ -29,7 +29,7 @@ class AudioChecker():
         # self.store = self.conf_dict['store_location']
 
         #self.audio_tape_length = str(self.conf_dict['audio_tape_length'])
-        self.audio_tape_length = 10
+        self.audio_tape_length = '10'
         self.correct_files_per_dir = int(60/int(self.audio_tape_length))
         self.end_sec = str(60-int(self.audio_tape_length)) 
 
@@ -43,7 +43,7 @@ class AudioChecker():
 
         self.day_summary = {}
         self.day_full = {}
-        self.first_last = {}
+        self.F_L = {}
         self.pi_dict = {}
         self.found_on_pi = []
         self.output_exists = False
@@ -176,7 +176,7 @@ class AudioChecker():
             self.day_cap = float("{0:.2f}".format(day_perc))
             self.zero_hours = [hr for hr in self.zero_dirs if self.zero_dirs[hr] == 60]
 
-            F1, F2 = self.first_last[d][0], self.first_last[d][1]
+            F1, F2 = self.F_L[d][0], self.F_L[d][1]
             s = (f'({F1[0:2]}:{F1[2:4]}, {F2[0:2]}:{F2[2:4]})')
             Summary = '{} {} {} {}'.format(self.server_id, d, s, self.perc_cap)
 
@@ -226,11 +226,16 @@ class AudioChecker():
         if days_n > len(self.date_folders):
             print('Not enough days exist. Using {} days'.format(len(self.date_folders)))
             days_n = len(self.date_folders)
+
         for d in self.date_folders[-days_n:]:
             hr_min_dirs = sorted(self.mylistdir(os.path.join(self.root_dir, d)))
-            min_1, min_L = self.hr_min_dirs[0], self.hr_min_dirs[-1]
-            self.first_last[d] = min_1, min_L            
+            min_1, min_L = hr_min_dirs[0], hr_min_dirs[-1]
+            # print(self.first_last)
+            # print(type(d), d)
+            self.F_L[d] = min_1, min_L  
+            #print(self.first_last)         
             self.get_all_mins(d, hr_min_dirs)
+            print(self.F_L[d], self.first_last)
             self.expect_num_wavs = len(self.expected_wavs)
             self.total_wavs = 0  
                        
