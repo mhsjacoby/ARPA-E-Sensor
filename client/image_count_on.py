@@ -20,7 +20,7 @@ class ImageChecker():
         self.write_file = write_file  
         self.data_loc = data_loc      
         self.conf()
-        self.root_dir = os.path.join(self.root, self.server_id, 'img')
+        self.root_dir = os.path.join(self.root, self.server_id, f'{self.home}-{self.server_id}-img-pkl')
 
         # self.import_conf(self.conf())
         # self.root = self.conf_dict['img_audio_root']
@@ -41,9 +41,9 @@ class ImageChecker():
         self.first_last = {}
         self.output_exists = False
         self.images_per_day = {}
+        self.summary = {}
 
     def conf(self):
-        print('data_loc (inside) {}'.format(self.data_loc))
         if not self.data_loc:
             self.import_conf('/root/client/client_conf.json')
             self.root = self.conf_dict['img_audio_root']
@@ -107,6 +107,15 @@ class ImageChecker():
         else:
             print('No output')
 
+    def write_summary(self, summary_dict):
+        fname = os.path.join(self.store, '{}-{}-image-summary.txt'.format(self.home, self.server_id))
+        with open(fname, 'w+') as writer:
+            for day in summary_dict:
+                day_details = summary_dict[day]
+                writer.write(day_details + '\n')   
+        writer.close()
+        print(fname + ': Write Sucessful!')
+
     def configure_output(self,d):
         if self.write_file or self.display_output:
 
@@ -114,6 +123,10 @@ class ImageChecker():
             self.perc_cap = float("{0:.2f}".format(perc))
             non_zero_dirs = [i for i in self.hr_min_dirs if i not in self.zero_hours]
             avg_imgs = self.total_imgs / len(non_zero_dirs)
+
+            F1, F2 = self.first_last[d][0], self.first_last[d][1]
+            s = (f'({F1[0:2]}:{F1[2:4]}, {F2[0:2]}:{F2[2:4]})')
+            Summary = '{} {} {} {}'.format(self.server_id, d, s, self.perc_cap)
                             
             output_dict_write = {
                 # 'Start Time': datetime.strptime(self.first_last[0], '%H%M').strftime('%H:%M'),
@@ -125,7 +138,7 @@ class ImageChecker():
                 'Number of directories w/ correct number images': len(self.count_correct),
                 'Number of directories w/ zero images': len(self.zero_hours),
                 'Hours with no images': self.zero_hours,
-                'Summary': (self.home, self.server_id, d, self.perc_cap)
+                'Summary': Summary
             }
             
             output_dict_display = {
@@ -138,10 +151,10 @@ class ImageChecker():
                 'Number of directories w/ zero images': len(self.zero_hours),
                 'Average number of images per non-zero_folder': avg_imgs,
                 'Hours with no images': self.zero_hours,
-                'Summary': (self.home, self.server_id, d, self.perc_cap)
+                'Summary': Summary
             }            
                         
-            return output_dict_write, output_dict_display
+            return output_dict_write, output_dict_display, Summary
    
     
     def main(self):
@@ -149,8 +162,11 @@ class ImageChecker():
         if days_n > len(self.date_folders):
             print('Not enough days exist. Using {} days'.format(len(self.date_folders)))
             days_n = len(self.date_folders)
+
         for d in self.date_folders[-days_n:]:
-            self.hr_min_dirs = self.mylistdir(os.path.join(self.root_dir, d))
+            self.hr_min_dirs = sorted(self.mylistdir(os.path.join(self.root_dir, d)))
+            min_1, min_L = self.hr_min_dirs[0], self.hr_min_dirs[-1]
+            self.first_last[d] = min_1, min_L
             self.zero_hours = []
             self.less_than_30 = []
             self.count_correct = []
@@ -162,6 +178,10 @@ class ImageChecker():
                 print('Date: {}, Sensor: {}'.format(d, self.server_id))
                 self.displayer(output_dict[1])
             self.writer(output_dict[0], d) 
+            self.summary[d] = output_dict[2]
+
+        self.write_summary(self.summary)
+
 
 
 
@@ -171,8 +191,6 @@ if __name__ == '__main__':
     server_id = sys.argv[2]
     days = sys.argv[3]
     data_loc = sys.argv[4] if len(sys.argv) > 4 else False
-    print('data_loc (outside) {}'.format(data_loc))
-    print('len of sys.argv {}'.format(len(sys.argv)))
 
     a = ImageChecker(home, server_id, days, data_loc)
     a.main()

@@ -39,7 +39,7 @@ class ImageExtract():
 
     def mylistdir(self, directory):
         filelist = os.listdir(directory)
-        return [x for x in filelist if not (x.startswith('.') or 'Icon' in x)]
+        return [x for x in filelist if x.startswith('2019-')]
 
     def extract_images(self, img_data):
         im_data = np.asarray(img_data)
@@ -50,8 +50,8 @@ class ImageExtract():
 
     def main(self):
         pickled_days = sorted(self.mylistdir(self.root_dir))
-        for day in pickled_days:
-            pickled_files = sorted(self.mylistdir(os.path.join(self.root_dir, day)))
+        for dayF in pickled_days:
+            pickled_files = sorted(self.mylistdir(os.path.join(self.root_dir, dayF)))
 
             for f in pickled_files:
                 print('time is: {}'.format(datetime.now().strftime('%H:%M:%S')))
@@ -59,12 +59,12 @@ class ImageExtract():
                 pickleName = f.strip('.pklz')
                 Names = pickleName.split('_')
                 day, hour, sensor, home = Names[0], Names[1], Names[2], Names[3]
-
-                new_store_dir = os.path.join(self.store_location, home, sensor, 'img', day)
-                hour_fdata = self.unpickle(os.path.join(self.root_dir, day, f))
+                if day != dayF:
+                    print(f'{pickleName} is in the wrong folder ({dayF})')
+                new_store_dir = os.path.join(self.store_location, sensor, 'img', day)
+                hour_fdata = self.unpickle(os.path.join(self.root_dir, dayF, f))
 
                 for entry in [x for x in hour_fdata if len(hour_fdata) > 0]:
-                    print(len(entry.data))
                     if entry.data != 0:
                         new_image = self.extract_images(entry.data)
                         full_img_dir = os.path.join(new_store_dir, str(entry.time)[0:4])
@@ -74,16 +74,17 @@ class ImageExtract():
                         fname = str(entry.day + '_' + entry.time + '_' + sensor + '_' + home + '.png')
                         if not os.path.exists(os.path.join(full_img_dir, fname)):
                             new_image.save(os.path.join(full_img_dir, fname))
-                        else:
-                            print('Image exists: {}'.format(fname))
+                        # else:
+                        #     print('Image exists: {}'.format(fname))
 
 
 
 if __name__ == '__main__':
-    pickle_location = sys.argv[1] if len(sys.argv) > 1 else '/Users/maggie/Desktop/HPD_mobile_data/HPD_mobile-H1/pickled_images'
-    new_image_location = '/Users/maggie/Desktop/Unpickled_Images'
-    if not os.path.isdir(new_image_location):
-        os.mkdir(new_image_location)
+    pickle_location = sys.argv[1] #if len(sys.argv) > 1 else '/Users/maggie/Desktop/HPD_mobile_data/HPD_mobile-H1/pickled_images'
+    new_image_location = sys.argv[2] # '/Users/maggie/Desktop/Unpickled_Images'
+    
+    # if not os.path.isdir(new_image_location):
+    #     os.mkdir(new_image_location)
     P = ImageExtract(pickle_location, new_image_location)
     P.main()
 
