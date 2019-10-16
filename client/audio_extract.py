@@ -29,8 +29,8 @@ class ImageExtract():
 
     def mylistdir(self, directory):
         filelist = os.listdir(directory)
-        return [x for x in filelist if not (x.startswith('.') or 'Icon' in x)]
-
+        return [x for x in filelist if x.startswith('2019-')]
+    
     def extract_audio(self, audio_data):
         pass
 
@@ -38,8 +38,8 @@ class ImageExtract():
 
     def main(self):
         pickled_days = sorted(self.mylistdir(self.root_dir))
-        for day in pickled_days:
-            pickled_files = sorted(self.mylistdir(os.path.join(self.root_dir, day)))
+        for dayF in pickled_days:
+            pickled_files = sorted(self.mylistdir(os.path.join(self.root_dir, dayF)))
 
             for f in pickled_files:
                 print('time is: {}'.format(datetime.now().strftime('%H:%M:%S')))
@@ -47,9 +47,11 @@ class ImageExtract():
                 pickleName = f.strip('_audio.pklz')
                 Names = pickleName.split('_')
                 day, hour, sensor, home = Names[0], Names[1], Names[2], Names[3]
+                if day != dayF:
+                    print(f'{pickleName} is in the wrong folder ({dayF})')
 
                 new_store_dir = os.path.join(self.store_location, home, sensor, 'audio', day)
-                hour_fdata = self.unpickle(os.path.join(self.root_dir, day, f))
+                hour_fdata = self.unpickle(os.path.join(self.root_dir, dayF, f))
 
                 for entry in [x for x in hour_fdata if len(hour_fdata) > 0]:
                         #new_audio = entry.data                    
@@ -70,9 +72,8 @@ class ImageExtract():
 
 
 if __name__ == '__main__':
-    pickle_location = sys.argv[1] if len(sys.argv) > 1 else '/Users/maggie/Desktop/HPD_mobile_data/HPD_mobile-H1/pickled_audio'
-    new_file_location = '/Users/maggie/Desktop/Unpickled_Audio'
-    if not os.path.isdir(new_file_location):
-        os.mkdir(new_file_location)
+    pickle_location = sys.argv[1]
+    new_file_location = 'sys.argv[2]'
+
     P = ImageExtract(pickle_location, new_file_location)
     P.main()
