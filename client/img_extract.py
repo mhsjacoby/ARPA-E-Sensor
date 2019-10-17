@@ -1,4 +1,4 @@
-# Modified 9/12
+# Updated 10/17/2019
 
 import os
 import sys
@@ -20,8 +20,14 @@ NewImage = collections.namedtuple('NewImage', 'day time data')
 """
 This class takes a list of pickled objects and extracts the raw images.
 The pickled objects are organized by hour.
-Change the path at the end to match your stored location,
-and where the new images should be saved to. 
+
+Run this program by specifying the path to the picked files, and the 
+target save directory. 
+
+eg:
+python3 ARPA-E-Sensor/client/img_extract.py /Volumes/SEAGATE-9/h3-black
+/RS1/H3-RS1-img-pkl/ /Users/maggie/Desktop/HPD_mobile_data/HPD_mobile-H3/H3-black/RS1/img
+
 
 This file extracts images that were pickled with 'img_save.py'
 """
@@ -83,8 +89,7 @@ if __name__ == '__main__':
     pickle_location = sys.argv[1] #if len(sys.argv) > 1 else '/Users/maggie/Desktop/HPD_mobile_data/HPD_mobile-H1/pickled_images'
     new_image_location = sys.argv[2] # '/Users/maggie/Desktop/Unpickled_Images'
     
-    # if not os.path.isdir(new_image_location):
-    #     os.mkdir(new_image_location)
+
     P = ImageExtract(pickle_location, new_image_location)
     P.main()
 

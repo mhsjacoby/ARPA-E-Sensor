@@ -1,4 +1,4 @@
-# Updated 9/12/2019
+# Updated 10/17/2019
 
 import os
 import sys
@@ -15,6 +15,33 @@ import csv
 
 
 NewAudio = collections.namedtuple('NewAudio', 'day time data')
+
+
+
+"""
+This class takes a list of pickled objects and extracts the audio files to .txt.
+The pickled objects are organized by hour.
+
+Run this program by specifying the path to the picked files, and the 
+target save directory. 
+
+eg:
+python3 ARPA-E-Sensor/client/audio_extract.py /Volumes/SEAGATE-9/h3-black
+/RS1/H3-RS1-audio-pkl/ /Users/maggie/Desktop/HPD_mobile_data/HPD_mobile-H3/H3-black/RS1/audio
+
+This file extracts audio that were pickled with 'audio_save.py'
+
+"""
+
+
+
+
+
+
+
+
+
+
 
 class ImageExtract():
     def __init__(self, root_dir, store_dir):
