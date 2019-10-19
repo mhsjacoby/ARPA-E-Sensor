@@ -27,9 +27,9 @@ class AudioFile():
 
 
     def get_params(self):
-        today = datetime.now().strftime('_%Y-%m-%d')
-        self.write_location = os.path.join(self.write_path, self.home + '_AudioPickled_' + self.sensor + today)
-        print(self.write_location)
+        #today = datetime.now().strftime('_%Y-%m-%d')
+        self.write_location = os.path.join(self.write_path, self.home + '-' + self.sensor + '-audio-pkl')
+        print(f'writing to: {self.write_location}')
         try:
             if not os.path.isdir(self.write_location):
                 print('Making directory: {}'.format(self.write_location))
