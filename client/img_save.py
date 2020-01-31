@@ -1,5 +1,4 @@
-# Updated 9/15/2019 - specify pickle write location (write_loc) at run
-
+# Updated 1/30/2010 - exempt USRP_dates from listdir function
 import os
 import sys
 import numpy as np
