@@ -50,7 +50,7 @@ class ImageFile():
 
     def mylistdir(self, directory):
         filelist = os.listdir(directory)
-        return [x for x in filelist if not (x.startswith('.') or 'Icon' in x)]
+        return [x for x in filelist if not (x.startswith('.') or 'Icon' in x or x.startswith('USRP'))]
 
     def get_time(self, file_name):
         day_time = datetime.strptime(file_name.strip('_photo.png'), '%Y-%m-%d %H%M%S')
