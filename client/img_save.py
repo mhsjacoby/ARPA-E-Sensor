@@ -1,5 +1,4 @@
-# Updated 9/15/2019 - specify pickle write location (write_loc) at run
-
+# Updated 1/30/2010 - exempt USRP_dates from listdir function
 import os
 import sys
 import numpy as np
@@ -50,7 +49,7 @@ class ImageFile():
 
     def mylistdir(self, directory):
         filelist = os.listdir(directory)
-        return [x for x in filelist if not (x.startswith('.') or 'Icon' in x)]
+        return [x for x in filelist if not (x.startswith('.') or 'Icon' in x or x.startswith('USRP'))]
 
     def get_time(self, file_name):
         day_time = datetime.strptime(file_name.strip('_photo.png'), '%Y-%m-%d %H%M%S')
