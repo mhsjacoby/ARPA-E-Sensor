@@ -37,12 +37,6 @@ This file extracts audio that were pickled with 'audio_save.py'
 
 
 
-
-
-
-
-
-
 class ImageExtract():
     def __init__(self, root_dir, store_dir):
         self.root_dir = root_dir
